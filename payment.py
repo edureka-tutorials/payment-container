@@ -4,7 +4,7 @@ import requests
 import os
 import logging
 import random
-from pymongo import MongoClient
+import pymongo
 import jwt
 
 logging.basicConfig(level=logging.DEBUG)
@@ -13,8 +13,11 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 
-client = MongoClient('paymentdb', 27017)
-db = client.paymentDb
+#client = MongoClient('paymentdb', 27017)
+#db = client.paymentDb
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+db = client["paymentdb"]
+col = db["payment"]
 
 @app.route('/payment', methods=['POST'])
 def payment():
@@ -30,13 +33,13 @@ def payment():
             try:
                logger.info("Creating new payment")
                paymentId = random.randint(1, 1000)
-               db.payment.insert({'_id': paymentId, 'order_id': data['orderId']})
+               col.insert_one({'_id': paymentId, 'order_id': data['orderId']})
             except:
                continue
             break
         
        headers = {'content-type': 'application/json'}
-       url = 'http://orders:5004/update-order-status'
+       url = 'http://52.3.249.40:5000/update-order-status'
        data = {"orderId": data['orderId']}
        data = json.dumps(data) 
        logger.info("Making a request to Orders to update order status")
