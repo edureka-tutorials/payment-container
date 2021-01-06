@@ -1,4 +1,4 @@
 flask
 requests
 pymongo
-pyjwt
+pyjwt==1.7.1
